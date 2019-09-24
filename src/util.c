@@ -333,9 +333,35 @@ static int is_known_txt_file_by_extension(char *filename)
 	p = strrchr(filename, '.');
 	if (p == NULL)	/* unknown file type */
 		return -1;
-	if (strcasecmp(p, ".txt") || strcasecmp(p, ".log") || strcasecmp(p, ".md") ||
-			strcasecmp(p, ".c") || strcasecmp(p, ".cpp") || strcasecmp(p, ".cxx") ||
-			strcasecmp(p, ".h") || strcasecmp(p, ".hpp") || strcasecmp(p, ".hxx"))
+
+	if (strcasecmp(p, ".txt") == 0 || strcasecmp(p, ".log") == 0 || strcasecmp(p, ".md") == 0 ||
+			strcasecmp(p, ".c") == 0 || strcasecmp(p, ".cpp") == 0 || strcasecmp(p, ".cxx") == 0 ||
+			strcasecmp(p, ".h") == 0 || strcasecmp(p, ".hpp") == 0 || strcasecmp(p, ".hxx") == 0)
+		return 1;
+	else
+		return 0;
+}
+
+static int is_known_bin_file_by_extension(char *filename)
+{
+	char *p;
+	p = strrchr(filename, '.');
+	if (p == NULL)	/* unknown file type */
+		return -1;
+
+	/*
+	 * FIXME may misjudge
+	 */
+	if (strcasestr(filename, ".so"))	/* It may be libxxx.so.x.x.x */
+		return 1;
+
+	if (strcasecmp(p, ".o") == 0 || strcasecmp(p, ".lo") == 0 ||
+			strcasecmp(p, ".a") == 0 || strcasecmp(p, ".la") == 0 || 
+			strcasecmp(p, ".lib") == 0 || strcasecmp(p, ".dll") == 0 ||
+			strcasecmp(p, ".bin") == 0 || strcasecmp(p, ".img") == 0 ||
+			strcasecmp(p, ".doc") == 0 || strcasecmp(p, ".docx") == 0 || 
+			strcasecmp(p, ".xls") == 0 || strcasecmp(p, ".xlsx") == 0 ||
+			strcasecmp(p, ".exe") == 0 || strcasecmp(p, ".dat") == 0)
 		return 1;
 	else
 		return 0;
@@ -354,6 +380,13 @@ int is_binary(const void *buf, const size_t buf_len, char *filename) {
 	 */
 	if (is_known_txt_file_by_extension(filename) == 1)
 		return 0;
+
+	/*
+	 * skip known file extension
+	 * Max,2019.9.26
+	 */
+	if (is_known_bin_file_by_extension(filename) == 1)
+		return 1;
 
 	if (buf_len == 0) {
 		/* Is an empty file binary? Is it text? */
