@@ -80,7 +80,7 @@ void realloc_matches(match_t **matches, size_t *matches_size, size_t matches_len
 void compile_study(pcre **re, pcre_extra **re_extra, char *q, const int pcre_opts, const int study_opts);
 
 
-int is_binary(const void *buf, const size_t buf_len);
+int is_binary(const void *buf, const size_t buf_len, char *filename);
 int is_regex(const char *query);
 int is_fnmatch(const char *filename);
 int binary_search(const char *needle, char **haystack, int start, int end);

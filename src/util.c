@@ -327,15 +327,36 @@ void compile_study(pcre **re, pcre_extra **re_extra, char *q, const int pcre_opt
     }
 }
 
+static int is_known_txt_file_by_extension(char *filename)
+{
+	char *p;
+	p = strrchr(filename, '.');
+	if (p == NULL)	/* unknown file type */
+		return -1;
+	if (strcasecmp(p, ".txt") || strcasecmp(p, ".log") || strcasecmp(p, ".md") ||
+			strcasecmp(p, ".c") || strcasecmp(p, ".cpp") || strcasecmp(p, ".cxx") ||
+			strcasecmp(p, ".h") || strcasecmp(p, ".hpp") || strcasecmp(p, ".hxx"))
+		return 1;
+	else
+		return 0;
+}
+
 /* This function is very hot. It's called on every file. */
-int is_binary(const void *buf, const size_t buf_len) {
+int is_binary(const void *buf, const size_t buf_len, char *filename) {
     size_t suspicious_bytes = 0;
     size_t total_bytes = buf_len > 512 ? 512 : buf_len;
     const unsigned char *buf_c = buf;
     size_t i;
 
-    if (buf_len == 0) {
-        /* Is an empty file binary? Is it text? */
+	/*
+	 * skip known file extension
+	 * Max,2019.9.24
+	 */
+	if (is_known_txt_file_by_extension(filename) == 1)
+		return 0;
+
+	if (buf_len == 0) {
+		/* Is an empty file binary? Is it text? */
         return 0;
     }
 

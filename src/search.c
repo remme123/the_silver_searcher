@@ -11,7 +11,7 @@ ssize_t search_buf(const char *buf, const size_t buf_len,
     if (opts.search_stream) {
         binary = 0;
     } else if (!opts.search_binary_files && opts.mmap) { /* if not using mmap, binary files have already been skipped */
-        binary = is_binary((const void *)buf, buf_len);
+        binary = is_binary((const void *)buf, buf_len, dir_full_path);
         if (binary) {
             log_debug("File %s is binary. Skipping...", dir_full_path);
             return -1;
@@ -177,7 +177,7 @@ multiline_done:
 
     if (!opts.print_nonmatching_files && (matches_len > 0 || opts.print_all_paths)) {
         if (binary == -1 && !opts.print_filename_only) {
-            binary = is_binary((const void *)buf, buf_len);
+            binary = is_binary((const void *)buf, buf_len, dir_full_path);
         }
         pthread_mutex_lock(&print_mtx);
         if (opts.print_filename_only) {
@@ -361,7 +361,7 @@ void search_file(const char *file_full_path) {
         if (!opts.search_binary_files) {
             bytes_read += read(fd, buf, ag_min(f_len, 512));
             // Optimization: If skipping binary files, don't read the whole buffer before checking if binary or not.
-            if (is_binary(buf, f_len)) {
+            if (is_binary(buf, f_len, file_full_path)) {
                 log_debug("File %s is binary. Skipping...", file_full_path);
                 goto cleanup;
             }
