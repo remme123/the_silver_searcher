@@ -764,7 +764,43 @@ void parse_options(int argc, char **argv, char **base_paths[], char **paths[]) {
         }
     }
 
-    if (accepts_query && argc > 0) {
+	/**
+	 *  flexable query pattern place
+	 *  the last arg first
+	 *  Max
+	 *  19.12.05
+	 */
+	/* if it is a query pattern, then move to the ag defined place */
+	if (access(argv[argc - 1], F_OK)) {
+		char *t;
+		int j;
+		for (j = argc - 2; j >= 0; j--) {
+			t = argv[j];
+			argv[j] = argv[j + 1];
+			argv[j + 1] = t;
+		}
+	} else {
+		/* if both places(first and last) exist, then check slash */
+		if (access(argv[0], F_OK) == 0) {
+			char *p = argv[argc - 1];
+			int len = strlen(p);
+			/* 
+			 * if the last arg does not end up whith '/',
+			 * then it is a query pattern 
+			 */
+			if (p[len - 1] != '/') {
+				char *t;
+				int j;
+				for (j = argc - 2; j >= 0; j--) {
+					t = argv[j];
+					argv[j] = argv[j + 1];
+					argv[j + 1] = t;
+				}
+			}
+		}
+	}
+
+	if (accepts_query && argc > 0) {
         if (!needs_query && strlen(argv[0]) == 0) {
             // use default query
             opts.query = ag_strdup(".");
